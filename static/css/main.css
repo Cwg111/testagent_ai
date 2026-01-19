@@ -1,0 +1,260 @@
+/* 全局重置+基础样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei", Arial, sans-serif;
+}
+
+/* 页面背景（类似DeepSeek的淡蓝渐变） */
+body {
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+    min-height: 100vh;
+}
+
+/* 页面容器：控制整体布局 */
+.page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 标题栏 */
+.page-header {
+    padding: 0 20px;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+/* 标题样式 */
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* 聊天消息区：占满中间空间 */
+.chat-container {
+    flex: 1;
+    padding: 0 20px;
+    overflow-y: auto;
+    margin-bottom: 180px; /* 给底部操作栏留空间 */
+}
+
+/* 消息内的功能图标样式 */
+.message-icon {
+    width: 28px;
+    height: 28px;
+    vertical-align: middle;
+    margin-right: 8px;
+    border-radius: 4px;
+}
+
+/* 消息通用样式 */
+.message {
+    margin-bottom: 15px;
+    display: flex;
+}
+
+/* 系统消息（初始提示） */
+.system-message .message-content {
+    background-color: #e8f4ff;
+    color: #34495e;
+}
+
+/* 智能体回复消息（生成结果） */
+.agent-message .message-content {
+    background-color: #ffffff;
+    color: #2c3e50;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 消息气泡样式 */
+.message-content {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+/* 底部固定操作栏 */
+.bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    background-color: #ffffff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 两层之间的间距 */
+}
+
+/*第一层：功能选择+上传文档按钮 */
+.top-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 35%;
+}
+
+/* 功能选择下拉框 */
+.function-select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    flex: 1; /* 自适应占满剩余空间 */
+    min-width: 200px;
+}
+
+/* 上传按钮的hover提示框（适配你的label.upload-btn） */
+/* 上传按钮：恢复框型样式 + 兼容提示框 */
+.upload-btn {
+    position: relative; /* 用于提示框定位 */
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    /* 恢复原有框型样式（和之前一致） */
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    color: #34495e;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+/* 按钮hover效果（恢复原有） */
+.upload-btn:hover {
+    background-color: #f5f7fa;
+}
+
+/* 提示框样式（保持不变） */
+.upload-btn .tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    background-color: #333;
+    color: #fff;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 10;
+}
+
+.upload-btn .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+}
+
+.upload-btn:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 上传文件名显示样式 */
+.uploaded-file-container {
+    padding: 5px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+/* 文件名+删除按钮的统一容器（核心：同一个框的样式） */
+.uploaded-file-wrapper {
+    background-color: #f5f7fa; /* 和之前的文件名背景一致 */
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex; /* 让文件名和删除按钮同行对齐 */
+    align-items: center;
+    gap: 8px; /* 文件名和删除按钮的间距 */
+    color: #555;
+    font-size: 13px;
+}
+
+/* 删除按钮样式（调整为框内的紧凑效果） */
+.delete-file-btn {
+    color: #555;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    line-height: 1; /* 避免按钮上下错位 */
+}
+
+.delete-file-btn:hover {
+    background-color: #f8d7da;
+}
+
+/* 第二层：对话输入框 + 右下角发送按钮（修改后） */
+.input-area {
+    position: relative; /* 作为按钮绝对定位的参考容器 */
+    width: 100%;
+}
+
+/* 对话输入框：预留右下角按钮的空间 */
+#chatInput {
+    display: block;
+    width: 100%;
+    padding: 12px 16px 40px 16px; /* 底部留40px（给按钮），右侧留80px（防止文字贴按钮） */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.6;
+    box-sizing: border-box;
+    min-height: 100px; /* 输入框初始高度（可根据需要调整） */
+}
+
+/* 发送按钮：绝对定位到输入框右下角 */
+#sendBtn {
+    position: absolute; /* 基于.input-area定位 */
+    bottom: 8px; /* 距离输入框底部8px */
+    right: 8px; /* 距离输入框右侧8px */
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+
+#sendBtn:hover {
+    background-color: #2980b9;
+}
+
+#sendBtn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* 导出按钮样式 */
+.export-btn {
+    background-color: #2ecc71;
+    color: #ffffff;
+}
+
+.export-btn:hover {
+    background-color: #27ae60;
+}

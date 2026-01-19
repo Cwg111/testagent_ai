@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TestAgent AI 智能助手</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+<!-- 页面容器：包含标题+聊天区+底部操作栏 -->
+<div class="page-container">
+    <!-- 标题栏 -->
+    <header class="page-header">
+        <h1>TestAgent AI 自动化工具</h1>
+    </header>
+
+    <!-- 聊天消息区（智能体问答样式） -->
+    <div class="chat-container">
+        <!-- 初始提示消息 -->
+        <div class="message system-message">
+            <div class="message-content">
+                <img src="/static/img/AI-test.png" class="message-icon" alt="AI图标">
+                请选择功能类型 → 上传需求文档 → 点击「发送」，我会为你生成对应的测试资产~
+            </div>
+        </div>
+        <!-- 生成的结果会插入这里 -->
+        <div id="resultContainer"></div>
+    </div>
+
+    <!-- 底部固定操作栏（功能选择+附件+按钮） -->
+    <div class="bottom-bar">
+        <!-- 上传文件名显示区域 -->
+        <div class="uploaded-file-container"></div>
+
+        <!-- 第一层：功能选择+附件上传按钮 -->
+        <div class="top-controls">
+            <!-- 功能选择下拉框 -->
+            <label for="functionType"></label>
+            <select id="functionType" class="function-select">
+                <option value="test">测试岗：功能用例+Web脚本+报告</option>
+                <option value="dev">开发岗：接口自动化脚本</option>
+                <option value="product">产品岗：需求验证用例</option>
+            </select>
+
+            <!-- 附件上传按钮 -->
+            <label class="upload-btn">
+                📎 上传文档
+                <div class="tooltip">仅支持上传单个文件，支持.txt/.md格式</div>
+                <input type="file" id="reqFile" accept=".txt,.md" hidden>
+            </label>
+        </div>
+
+        <!-- 第二层：输入框+生成按钮 -->
+        <div class="input-area">
+            <label for="chatInput"></label>
+            <textarea
+                    id="chatInput"
+                    placeholder="请输入你的需求（如：生成登录接口测试用例）..."
+                    rows="3"
+            ></textarea>
+            <!-- 生成按钮 -->
+            <button id="sendBtn" onclick="handleSend()">发送</button>
+        </div>
+
+        <!-- 导出按钮（初始隐藏，生成后显示） -->
+        <button id="exportBtn" onclick="exportContent()" class="export-btn" hidden>导出结果</button>
+
+        <!-- 隐藏域：存储临时路径+导出文件夹路径 -->
+        <input type="hidden" id="tempPath" value="">
+        <input type="hidden" id="exportPath" value="">
+    </div>
+</div>
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>
