@@ -45,12 +45,12 @@
             <!-- 附件上传按钮 -->
             <label class="upload-btn">
                 📎 上传文档
-                <div class="tooltip">仅支持上传单个文件，支持.txt/.md格式</div>
-                <input type="file" id="reqFile" accept=".txt,.md" hidden>
+                <div class="tooltip">仅支持上传单个文件，支持.txt,.md,.doc,.docx,.pdf格式</div>
+                <input type="file" id="reqFile" accept=".txt,.md,.doc,.docx,.pdf" hidden>
             </label>
         </div>
 
-        <!-- 第二层：输入框+生成按钮 -->
+        <!-- 第二层：输入框+发送按钮 -->
         <div class="input-area">
             <label for="chatInput"></label>
             <textarea
@@ -58,7 +58,7 @@
                     placeholder="请输入你的需求（如：生成登录接口测试用例）..."
                     rows="3"
             ></textarea>
-            <!-- 生成按钮 -->
+            <!-- 发送按钮 -->
             <button id="sendBtn" onclick="handleSend()">发送</button>
         </div>
 

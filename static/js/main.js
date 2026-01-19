@@ -9,9 +9,9 @@ reqFile.addEventListener('change', (e) => {
 
     // 验证格式
     const fileExt = selectedFile.name.slice(selectedFile.name.lastIndexOf('.')).toLowerCase();
-    const allowedExts = ['.txt', '.md'];
+    const allowedExts = ['.txt', '.md', '.doc', '.docx','.pdf'];
     if (!allowedExts.includes(fileExt)) {
-        alert('仅支持上传.txt或.md格式的文档哦~');
+        alert('仅支持上传.txt,.md,.doc,.docx,.pdf格式的文档哦~');
         reqFile.value = ''; // 清空无效选择
         return;
     }

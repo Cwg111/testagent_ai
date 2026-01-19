@@ -8,9 +8,8 @@
 # 忽略Python编译缓存
 __pycache__/
 
-# 保留所有文件夹下的Outputs下的allure文件夹，仅忽略其内部内容
+# 保留文件夹，仅忽略其内部内容
 **/generated_scripts/**
-# 保留所有文件夹下的Outputs下的logs文件夹，仅忽略其内部内容
 **/reports/**
 
 # 可补充其他需要忽略的内容（比如日志文件、临时文件）

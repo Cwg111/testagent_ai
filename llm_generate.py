@@ -5,7 +5,8 @@
 @time:2026-01-09
 """
 import openai
-from config_loader import CONFIG
+from openai.types.chat import ChatCompletionUserMessageParam
+from src.config import CONFIG
 
 
 # 初始化大模型客户端
@@ -22,7 +23,7 @@ def generate_script(prompt):
     try:
         response = client.chat.completions.create(
             model=CONFIG["llm"]["model"],
-            messages=[{"role": "user", "content": prompt}],
+            messages=[ChatCompletionUserMessageParam(role="user", content=prompt)],
             temperature=CONFIG["llm"]["temperature"]
         )
         return response.choices[0].message.content
