@@ -36,7 +36,42 @@ class CommandParser:
         use_context指的是是否使用上下文
         confidence指的是程序对“解析出来的用户意图是否准确”的把握程度
         """
-        pass
+        command = command_text.strip()
+        if not command:
+            return {"intent": None, "use_context": False, "confidence": 0.0}
+        intent=None
+        use_context=False
+
+        # 匹配“生成测试用例”意图
+        for kw in self.CASE_INTENT_KEYWORDS:
+            if kw in command:
+                intent = "generate_case"
+                break
+
+        # 匹配“生成测试脚本”意图
+        if not intent:
+            for kw in self.SCRIPT_INTENT_KEYWORDS:
+                if kw in command:
+                    intent = "generate_script"
+                    # 检查是否需要上下文
+                    for ctx_kw in self.CONTEXT_KEYWORDS:
+                        if ctx_kw in command:
+                            use_context = True
+                            break
+                    break
+
+        # LLM兜底（关键字匹配失败时）
+        if not intent:
+            try:
+                llm_result=self.llm_client.parse_command_intent(command)
+            except Exception as e:
+                print(f"LLM解析失败，请检查输入指令：{e}")
+            else:
+                intent = llm_result["intent"]
+                use_context = llm_result["use_context"]
+        return {"intent": intent,
+                "use_context": use_context,
+                "confidence": 1.0 if intent else 0.0}
 
 
 if __name__ == "__main__":
