@@ -32,5 +32,5 @@ def generate_script(prompt):
 
 
 if __name__ == '__main__':
-    test_prompt = "生成一个简单的Python+Requests接口测试脚本，请求GET https://httpbin.org/get，断言状态码为200"
+    test_prompt = "把我要吃番茄炒鸡蛋翻译成英文"
     print(generate_script(test_prompt))
