@@ -32,5 +32,5 @@ def generate_script(prompt):
 
 
 if __name__ == '__main__':
-    test_prompt = "把我要吃番茄炒鸡蛋翻译成英文"
+    test_prompt = "写一个100字左右的小作文"
     print(generate_script(test_prompt))

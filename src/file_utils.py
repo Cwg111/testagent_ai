@@ -4,17 +4,16 @@
 
 import os
 import pandas as pd
-from docx import Document
 import markdown_it
 from typing import Literal
 import pdfplumber
-import win32com.client as win32  # Windows专属：解析.dox格式
+import docx2txt
 
 
 class FileUtils:
     """通用文件解析工具（仅支持Windows环境），提取文本内容"""
     # 支持的格式：txt/md/doc/docx/pdf/xls/xlsx
-    SUPPORTED_FILE_TYPES = ["txt", "md", "doc", "docx", "pdf", "xls", "xlsx"]
+    SUPPORTED_FILE_TYPES = [".txt", ".md", ".docx", ".pdf", ".xls", ".xlsx", ".json"]
 
     @staticmethod
     def validate_file_type(file_path: str) -> bool:
@@ -27,27 +26,20 @@ class FileUtils:
         return file_type in FileUtils.SUPPORTED_FILE_TYPES
 
     @staticmethod
-    def parse_doc(file_path: str) -> str:
+    def parse_docx(file_path: str) -> str:
         """
-        解析.doc格式文件（仅Window环境，依赖pywin32）
-        :param file_path: 文件路径
-        :return: 处理好的文本内容
+        用docx2txt解析docx文件（仅提取文本+表格，完全跳过图片）
         """
-        word = None
         try:
-            # Windows COM接口调用Word解析.doc
-            word = win32.Dispatch("Word.Application")
-            word.Visible = False  # 后台运行，不显示word窗口
-            word.DisplayAlerts = 0  # 屏蔽word弹窗，比如格式兼容窗口
-            doc = word.Documents.Open(os.path.abspath(file_path))
-            text = doc.Content.Text.strip()
-            doc.Close(SaveChange=0)  # 不保存修改
-            return text
+            # 核心：仅传文件路径，不传图片保存目录 → 自动跳过图片处理
+            # docx2txt.process默认会提取表格（转为文本表格）、段落，忽略图片
+            text = docx2txt.process(file_path)
+
+            # 清理多余空行和首尾空格，提升可读性
+            cleaned_text = "\n".join([line.strip() for line in text.splitlines() if line.strip()])
+            return cleaned_text
         except Exception as e:
-            raise RuntimeError(f"解析.doc文件失败：{e}\n请确认：1.已安装Microsoft Word;2.已安装pywin32")
-        finally:
-            if word:
-                word.Quit()
+            raise RuntimeError(f"解析docx文件失败：{str(e)}")
 
     @staticmethod
     def parse_pdf(file_path: str) -> str:
@@ -78,7 +70,7 @@ class FileUtils:
         ext = os.path.splitext(file_path)[1].lower()
 
         # 适配Excel引擎，xls用xlrd，xlsx用openpyxl，使用Literal限制engine只能取xlrd或openpyxl
-        engine: Literal["xlrd", "openpyxl"] = "xlrd" if ext == ".xls" else "openpyxl"
+        engine: Literal["xlrd", "openpyxl"] = "xlrd" if ext == ".xls" else "openpyxl"  # type: ignore
 
         try:
             excel_file = pd.ExcelFile(file_path, engine=engine)
@@ -121,18 +113,22 @@ class FileUtils:
         elif ext == ".md":
             with open(file_path, "r", encoding="utf-8") as f:
                 return f.read().strip()
-        elif ext == ".doc":
-            return FileUtils.parse_doc(file_path)
         elif ext == ".docx":
-            document = Document(file_path)
-            return "\n".join([para.text.strip() for para in document.paragraphs if para.text.strip()])
+            return FileUtils.parse_docx(file_path)
         elif ext == ".pdf":
             return FileUtils.parse_pdf(file_path)
         elif ext in [".xls", ".xlsx"]:
             return FileUtils.parse_excel(file_path)
+        elif ext == ".json":
+            with open(file_path, "r", encoding="utf-8") as f:
+                return f.read()
         else:
             raise ValueError(f"不支持的文件类型：{ext}，仅支持{FileUtils.SUPPORTED_FILE_TYPES}")
 
 
 if __name__ == "__main__":
-    run_code = 0
+    # 测试四种格式文档的读取，测试文件在reports目录下
+    # from src.paths import reports_path
+    # test_file = os.path.join(reports_path, "test.xlsx")
+    # print(FileUtils.parse_file(test_file))
+    pass

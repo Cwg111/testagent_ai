@@ -63,9 +63,9 @@ class SessionContextManager:
         session = self.get_session(session_id)
         return session.generated_case_path if not session.is_expired else ""
 
-# 全局单例
-session_manager=SessionContextManager()
 
+# 全局单例
+session_manager = SessionContextManager()
 
 if __name__ == '__main__':
     pass

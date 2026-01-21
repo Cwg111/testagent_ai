@@ -9,9 +9,13 @@ env_path = os.path.join(base_path, ".env")
 config_yaml_path = os.path.join(base_path, "config.yaml")
 generated_scripts_path = os.path.join(base_path, "generated_scripts")
 reports_path = os.path.join(base_path, "reports")
+temp_path = os.path.join(base_path, "temp_uploads")  # 用来存储用户上传的文件
+case_path = os.path.join(base_path, "generated_cases")  # 用来存储生成的测试用例
+# 用来存储生成的自动化测试脚本
+web_script_path = os.path.join(generated_scripts_path, "web_scripts")
 
-# generated_scripts_path和reports_path不存在时，自动创建目录
-for path in [generated_scripts_path, reports_path]:
+# 目录不存在时，自动创建目录
+for path in [generated_scripts_path, reports_path, temp_path, case_path, web_script_path]:
     os.makedirs(path, exist_ok=True)
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@
 __pycache__/
 
 # 保留文件夹，仅忽略其内部内容
+**/generated_cases/**
 **/generated_scripts/**
 **/reports/**
 
