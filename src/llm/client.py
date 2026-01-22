@@ -64,25 +64,25 @@ class LLMClient:
         try:
             response = self.client.chat.completions.create(**request_params)
             for chunk in response:
-                if chunk.choices and len(chunk.choices)>0 and chunk.choices[0].delta.content:
+                if chunk.choices and len(chunk.choices) > 0 and chunk.choices[0].delta.content:
                     yield chunk.choices[0].delta.content  # 逐段返回给前端
         except Exception as e:
             yield f"生成失败：{str(e)}"
 
     @staticmethod
-    def _concat_stream_response(generator:Generator[str, None, None]):
+    def _concat_stream_response(generator: Generator[str, None, None]):
         """
         辅助方法，拼接流式返回的生成器内容为完整字符串
         :param generator: 流式返回的生成器
         :return: 拼接后的完整字符串
         """
-        full_content= ""
+        full_content = ""
         for chunk in generator:
             full_content += chunk
         return full_content
 
     # ----------------测试岗能力------------
-    def parse_requirement_to_testcase_stream(self,requirement_text: str)-> Generator[str, None, None]:
+    def parse_requirement_to_testcase_stream(self, requirement_text: str) -> Generator[str, None, None]:
         """
         流式返回测试用例JSON（前端实时显示加载过程）
         :param requirement_text: 需求文档
@@ -105,7 +105,6 @@ class LLMClient:
         except Exception as e:
             print(f"解析测试用例失败，llm返回非法json：{str(e)}")
             return {}
-
 
     def testcase_to_web_script(self, case_text: str) -> Generator[str, None, None]:
         """
@@ -141,34 +140,36 @@ class LLMClient:
 
 
 if __name__ == "__main__":
-    # ---测试基于需求文档生成测试用例---
+    # # ---测试基于需求文档生成测试用例---
     # from src.paths import *
     # from src.file_utils import FileUtils
+    #
     # test = os.path.join(reports_path, "需求文档.docx")
     # test_text = FileUtils.parse_file(test)
-    # client=LLMClient()
+    # client = LLMClient()
     # # 使用流式方法，逐段输出
     # print("开始生成测试用例...")
-    # print("="*50)
-    # full_response=""
+    # print("=" * 50)
+    # full_response = ""
     # for chunk in client.parse_requirement_to_testcase_stream(test_text):
-    #     print(chunk,end="",flush=True)
-    #     full_response+=chunk
+    #     print(chunk, end="", flush=True)
+    #     full_response += chunk
 
     # # ---测试基于测试用例生成Selenium+pytest脚本---
     # from src.paths import *
     # from src.file_utils import FileUtils
-    # test=os.path.join(reports_path, "电商系统V2.0测试用例.xlsx")
-    # test_text=FileUtils.parse_file(test)
-    # client=LLMClient()
+    #
+    # test = os.path.join(reports_path, "电商系统V2.0测试用例.xlsx")
+    # test_text = FileUtils.parse_file(test)
+    # client = LLMClient()
     # # 使用流式方法，逐段输出
     # print("开始生成web自动化测试脚本...")
-    # print("="*50)
-    # full_response=""
+    # print("=" * 50)
+    # full_response = ""
     # for chunk in client.testcase_to_web_script(test_text):
-    #     print(chunk,end="",flush=True)
-    #     full_response+=chunk
+    #     print(chunk, end="", flush=True)
+    #     full_response += chunk
 
-    # ---测试解析用户指令意图---
+    # # ---测试解析用户指令意图---
     # print(LLMClient().parse_command_intent("基于上面我上传的需求文档，生成测试用例"))
     pass

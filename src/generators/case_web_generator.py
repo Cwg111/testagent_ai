@@ -3,7 +3,7 @@
 # @Author    :ChenWenGang
 import datetime
 import json
-from typing import Dict,Generator
+from typing import Dict, Generator
 from src.llm.client import LLMClient
 from src.command_parser import CommandParser
 from src.context_manager import session_manager
@@ -16,7 +16,8 @@ class TestGenerator:
         self.llm_client = LLMClient()
         self.command_parser = CommandParser()
 
-    def process_by_command(self, file_path: str, command_text: str, session_id: str = None) -> Generator[Dict,None,None]:
+    def process_by_command(self, file_path: str, command_text: str, session_id: str = None) -> Generator[
+        Dict, None, None]:
         """
         核心入口，生成测试用例/测试脚本，逐段返回结果
         :param file_path: 需求文档/用例文件路径
@@ -44,7 +45,7 @@ class TestGenerator:
             if intent == "generate_case":
                 yield from self._handle_generate_case(file_path, current_session_id)
             elif intent == "generate_script":
-                yield from self._handle_generate_script(file_path, use_context,current_session_id)
+                yield from self._handle_generate_script(use_context, file_path, current_session_id)
             else:
                 yield {
                     "status": "error",
@@ -58,7 +59,7 @@ class TestGenerator:
                 "data": f"生成失败：{str(e)}"
             }
 
-    def _handle_generate_case(self, file_path: str, session_id: str = None) -> Generator[Dict,None,None]:
+    def _handle_generate_case(self, file_path: str, session_id: str = None) -> Generator[Dict, None, None]:
         """
         流式生成测试用例（返回表格渲染数据）
         :param file_path: 需求文档路径
@@ -85,13 +86,13 @@ class TestGenerator:
         requirement_text = FileUtils.parse_file(file_path)
         # 流式获取LLM生成的测试用例JSON（实时返回内容）
         case_json_stream = self.llm_client.parse_requirement_to_testcase_stream(requirement_text)
-        full_case_json= ""
+        full_case_json = ""
         for chunk in case_json_stream:
             full_case_json += chunk
             yield {
                 "status": "success",
                 "session_id": session_id,
-                "data": chunk # 前端实时显示JSON片段
+                "data": chunk  # 前端实时显示JSON片段
             }
         # 解析用例JSON，生成表格数据
         try:
@@ -102,18 +103,18 @@ class TestGenerator:
                 "session_id": session_id,
                 "data": f"测试用例解析失败：{str(e)}"
             }
-            return # 当解析失败时，返回错误信息，不再执行后续代码
+            return  # 当解析失败时，返回错误信息，不再执行后续代码
         # 保存用例JSON文件
         test_suite = case_data.get("test_suite", "未知套件")
         case_filename = f"{test_suite}_case_{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.json"
         save_case_path = os.path.join(case_path, case_filename)
         with open(save_case_path, "w", encoding="utf-8") as f:
-            json.dump(case_data, f, indent=2, ensure_ascii=False) # type: ignore
+            json.dump(case_data, f, indent=2, ensure_ascii=False)  # type: ignore
         # 本次会话记住生成的用例路径，下次请求时使用
         session_manager.save_case_path(session_id, save_case_path)
         # 返回最终结果（表格数据+文件路径）
         yield {
-            "type":"final",
+            "type": "final",
             "session_id": session_id,
             "data": {
                 "status": "success",
@@ -123,10 +124,11 @@ class TestGenerator:
             }
         }
 
-    def _handle_generate_script(self, file_path: str, use_context: bool, session_id: str = None) -> Generator[Dict,None,None]:
+    def _handle_generate_script(self, use_context: bool, file_path: str = None, session_id: str = None) -> Generator[
+        Dict, None, None]:
         """
         流式生成生成Selenium+pytest测试脚本
-        :param file_path: 上传的测试用例文件路径
+        :param file_path: 上传的测试用例文件路径，当需要上下文时可以不用上传文件
         :param use_context: 是否需要上下文
         :param session_id: 会话ID
         :yield: 流式返回字典，格式：
@@ -170,13 +172,13 @@ class TestGenerator:
         # 解析用例，生成Selenium+pytest脚本
         case_text = FileUtils.parse_file(case_path_target)
         script_stream = self.llm_client.testcase_to_web_script(case_text)
-        full_script=""
+        full_script = ""
         for chunk in script_stream:
             full_script += chunk
             yield {
                 "status": "success",
                 "session_id": session_id,
-                "data": chunk # 前端实时显示脚本片段
+                "data": chunk  # 前端实时显示脚本片段
             }
 
         # 保存脚本文件
@@ -236,15 +238,14 @@ class TestGenerator:
 
 
 if __name__ == "__main__":
-    # 测试需求文档生成测试用例
-    file_path=os.path.join(reports_path, "需求文档.docx")
-    generator=TestGenerator().process_by_command(file_path, "生成测试用例",session_id=None)
-    for chunk in generator:
-        print(chunk)
+    # # 测试需求文档生成测试用例
+    # test_file_path = os.path.join(reports_path, "需求文档.docx")
+    # generator = TestGenerator().process_by_command(test_file_path, "生成测试用例", session_id=None)
+    # for chunk in generator:
+    #     print(chunk)
     # # 测试用例生成Selenium+pytest脚本
-    # file_path=os.path.join(reports_path, "电商系统V2.0测试用例.xlsx")
-    # generator=TestGenerator().process_by_command(file_path, "生成自动化测试脚本",session_id=None)
+    # test_file_path = os.path.join(reports_path, "电商系统V2.0测试用例.xlsx")
+    # generator = TestGenerator().process_by_command(test_file_path, "生成自动化测试脚本", session_id=None)
     # for chunk in generator:
     #     print(chunk)
     pass
-

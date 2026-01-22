@@ -13,6 +13,10 @@ temp_path = os.path.join(base_path, "temp_uploads")  # 用来存储用户上传�
 case_path = os.path.join(base_path, "generated_cases")  # 用来存储生成的测试用例
 # 用来存储生成的自动化测试脚本
 web_script_path = os.path.join(generated_scripts_path, "web_scripts")
+# 模板文件路径
+index_html_path = os.path.join(base_path, "templates", "index.html")
+# 静态文件（static）路径
+static_path = os.path.join(base_path, "static")
 
 # 目录不存在时，自动创建目录
 for path in [generated_scripts_path, reports_path, temp_path, case_path, web_script_path]:
