@@ -144,7 +144,7 @@ if __name__ == "__main__":
     # from src.paths import *
     # from src.file_utils import FileUtils
     #
-    # test = os.path.join(reports_path, "需求文档.docx")
+    # test = os.path.join(test_file_path, "需求文档.docx")
     # test_text = FileUtils.parse_file(test)
     # client = LLMClient()
     # # 使用流式方法，逐段输出
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     # from src.paths import *
     # from src.file_utils import FileUtils
     #
-    # test = os.path.join(reports_path, "电商系统V2.0测试用例.xlsx")
+    # test = os.path.join(test_file_path, "电商系统V2.0测试用例.xlsx")
     # test_text = FileUtils.parse_file(test)
     # client = LLMClient()
     # # 使用流式方法，逐段输出
@@ -171,5 +171,5 @@ if __name__ == "__main__":
     #     full_response += chunk
 
     # # ---测试解析用户指令意图---
-    # print(LLMClient().parse_command_intent("基于上面我上传的需求文档，生成测试用例"))
+    # print(LLMClient().parse_command_intent("你怎么就直接从需求文档生成测试脚本了，我没这么设计啊"))
     pass

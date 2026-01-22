@@ -1,8 +1,7 @@
 # @FileName  :routes.py
 # @Time      :2026/1/19 10:14
 # @Author    :ChenWenGang
-import time
-
+from datetime import datetime
 from fastapi import FastAPI, UploadFile, File, Form, Query
 from fastapi.responses import StreamingResponse, FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,7 +49,8 @@ async def process_command(
     file_path = ""
     if file:
         # 生成唯一文件名：时间戳+文件名
-        filename = f"{int(time.time())}_{file.filename}"
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        filename = f"{timestamp}_{file.filename}"
         file_path = os.path.join(temp_path, filename)
         with open(file_path, "wb") as f:
             f.write(await file.read())

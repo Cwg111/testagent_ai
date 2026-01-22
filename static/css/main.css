@@ -18,9 +18,11 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px 0;
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    /* 防止内容溢出到屏幕外 */
+    overflow: hidden;
 }
 
 /* 标题栏 */
@@ -40,9 +42,13 @@ h1 {
 /* 聊天消息区：占满中间空间 */
 .chat-container {
     flex: 1;
-    padding: 0 20px;
-    overflow-y: auto;
-    margin-bottom: 180px; /* 给底部操作栏留空间 */
+    /* 强制显示垂直滚动条（内容超过时） */
+    overflow-y: auto !important;
+    /* 限制高度：视口高度 - 标题高度 - 底部栏预留空间（根据你的页面调整数值） */
+    max-height: calc(100vh - 80px - 250px);
+    /* 底部留足空间，避免被底部栏遮挡 */
+    margin-bottom: 250px;
+    padding: 0 20px 20px;
 }
 
 /* 消息内的功能图标样式 */
@@ -64,13 +70,6 @@ h1 {
 .system-message .message-content {
     background-color: #e8f4ff;
     color: #34495e;
-}
-
-/* 智能体回复消息（生成结果） */
-.agent-message .message-content {
-    background-color: #ffffff;
-    color: #2c3e50;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* 消息气泡样式 */
@@ -97,6 +96,7 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 10px; /* 两层之间的间距 */
+    z-index: 10; /* 避免被其他元素遮挡 */
 }
 
 /*第一层：功能选择+上传文档按钮 */
@@ -258,3 +258,38 @@ h1 {
 .export-btn:hover {
     background-color: #27ae60;
 }
+
+/* 关键：用.message.user-message 组合选择器（匹配同时有这两个类的元素） */
+.message.user-message {
+    display: flex !important;
+    justify-content: flex-end !important; /* 强制居右 */
+    margin-bottom: 15px !important;
+    width: 100% !important; /* 占满父容器，对齐才生效 */
+}
+
+/* 匹配用户消息的内容区 */
+.message.user-message .message-content {
+    background-color: #2ecc71 !important; /* 绿色背景（必显） */
+    color: #ffffff !important; /* 白色文字（必显） */
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 12px;
+}
+
+/* AI消息：组合选择器提高优先级 */
+.message.agent-message {
+    display: flex !important;
+    justify-content: flex-start !important; /* 强制居左 */
+    margin-bottom: 15px !important;
+    width: 100% !important;
+}
+
+/* AI消息内容区 */
+.message.agent-message .message-content {
+    background-color: #e8f4f8 !important; /* 浅蓝背景 */
+    color: #34495e !important; /* 深色文字 */
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 12px;
+}
+

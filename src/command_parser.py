@@ -75,5 +75,5 @@ class CommandParser:
 
 
 if __name__ == "__main__":
-    print(CommandParser().parse_command("基于上面生成的测试用例生成测试脚本"))
+    print(CommandParser().parse_command("测试"))
     run_code = 0

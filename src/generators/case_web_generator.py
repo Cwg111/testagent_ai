@@ -77,6 +77,7 @@ class TestGenerator:
                 "session_id": session_id,
                 "data": "生成测试用例需要上传需求文档"
             }
+            return  # 当解析失败时，返回错误信息，不再执行后续代码
         # 返回状态，开始解析需求文档
         yield {
             "status": "success",
@@ -144,7 +145,7 @@ class TestGenerator:
             yield {
                 "status": "success",
                 "session_id": session_id,
-                "data": "本次会话已生成测试用例，正在生成测试脚本中..."
+                "data": "回答这个问题需要使用上下文，正读取上下文中..."
             }
             case_path_target = session_manager.get_case_path(session_id)
             if not case_path_target:
@@ -153,6 +154,7 @@ class TestGenerator:
                     "session_id": session_id,
                     "data": "本次会话未生成测试用例，请先上传需求文档生成测试用例"
                 }
+                return  # 当解析失败时，返回错误信息，不再执行后续代码
         else:
             if not file_path:
                 yield {
@@ -160,6 +162,7 @@ class TestGenerator:
                     "session_id": session_id,
                     "data": "生成测试脚本需要上传测试用例"
                 }
+                return  # 当解析失败时，返回错误信息，不再执行后续代码
             case_path_target = file_path
 
         # 返回状态，开始解析用例
@@ -218,8 +221,8 @@ class TestGenerator:
 
             # 遍历模块下的所有测试用例
             for case in cases:
-                # 将步骤列表转换为字符串（用换行符连接）
-                steps_str = '\n'.join(case.get('steps', []))
+                # 将步骤列表转换为字符串（用英文逗号连接）
+                steps_str = ','.join(case.get('steps', []))
 
                 # 构建表格行数据
                 table_row = {
@@ -239,12 +242,12 @@ class TestGenerator:
 
 if __name__ == "__main__":
     # # 测试需求文档生成测试用例
-    # test_file_path = os.path.join(reports_path, "需求文档.docx")
+    # test_file_path = os.path.join(test_file_path, "需求文档.docx")
     # generator = TestGenerator().process_by_command(test_file_path, "生成测试用例", session_id=None)
     # for chunk in generator:
     #     print(chunk)
     # # 测试用例生成Selenium+pytest脚本
-    # test_file_path = os.path.join(reports_path, "电商系统V2.0测试用例.xlsx")
+    # test_file_path = os.path.join(test_file_path, "电商系统V2.0测试用例.xlsx")
     # generator = TestGenerator().process_by_command(test_file_path, "生成自动化测试脚本", session_id=None)
     # for chunk in generator:
     #     print(chunk)

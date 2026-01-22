@@ -4,4 +4,4 @@ llm:
   api_key: "" # 通过读取.env获取
   base_url: "" # 通过读取.env获取，默认值为https://zhouliuai.online/v1
   timeout: 60 # 超时时间
-  temperature: 0.2
+  temperature: 0.6

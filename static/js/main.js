@@ -1,13 +1,47 @@
 // 元素绑定
 const reqFile = document.getElementById('reqFile');
 const uploadedFileContainer = document.querySelector('.uploaded-file-container');
-const resultContainer = document.querySelector('.result-container');
-const sendBtn = document.querySelector('.send-btn');
-const chatInput = document.querySelector('.chat-input');
-const functionType = document.querySelector('.function-type');
+const chatContainer=document.querySelector('.chat-container');
+const resultContainer = document.getElementById('resultContainer');
+const sendBtn = document.getElementById('sendBtn');
+const chatInput = document.getElementById('chatInput');
+const functionType = document.getElementById('functionType');
 
 // 会话ID：页面刷新/新打开时重置为null
-let currentSessionID = null;
+let currentSessionId = null;
+
+function scrollToBottom() {
+    requestAnimationFrame(
+        () => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    )
+}
+
+// 显示用户上传的文件名称到右侧聊天区
+function showUploadedFileInChat(fileName){
+    const fileMsg=document.createElement('div');
+    fileMsg.className = 'message user-message';
+    fileMsg.innerHTML = `
+        <div class="message-content">
+            <span style="margin-right: 8px;">👤</span>
+            上传文件：<strong>${fileName}</strong>
+        </div>
+    `;
+    resultContainer.appendChild(fileMsg);
+    scrollToBottom(); //自动滚动到底部
+}
+
+// 显示用户输入的问题
+function showUserQuestionInChat(question){
+    const questionMsg=document.createElement('div');
+    questionMsg.className = 'message user-message';
+    questionMsg.innerHTML = `
+        <div class="message-content">👤 ${question}</div>
+    `;
+    resultContainer.appendChild(questionMsg);
+    scrollToBottom();
+}
 
 // 监听文件选择（你的#reqFile）
 reqFile.addEventListener('change', (e) => {
@@ -34,7 +68,14 @@ reqFile.addEventListener('change', (e) => {
     document.querySelector('.delete-file-btn').addEventListener('click', () => {
         reqFile.value = ''; // 清空文件选择框
         uploadedFileContainer.innerHTML = '';
-    })
+        // 删除右侧聊天区对应的文件信息
+        const fileMsg = resultContainer.querySelectorAll('.user-message');
+        fileMsg.forEach(msg=>{
+            if (msg.innerHTML.includes('上传文件：')) msg.remove();
+        });
+    });
+    // 显示上传的文件名
+    showUploadedFileInChat(selectedFile.name);
 });
 
 // 发送按钮核心逻辑（流式请求+实时显示）
@@ -62,11 +103,14 @@ async function handleSend() {
     // 创建FormData（包含文件/指令、session_id）
     const formData = new FormData();
     formData.append('command_text',fullCommand);
-    if (currentSessionID) formData.append('session_id',currentSessionID)
+    if (currentSessionId) formData.append('session_id',currentSessionId)
     if (selectedFile) formData.append('file',selectedFile);
 
     // 清空输入框
     chatInput.value = '';
+
+    // 显示用户输入的问题
+    showUserQuestionInChat(commandText);
 
     // 创建AI回复容器（实时更新内容）
     const messageDiv=document.createElement('div');
@@ -82,7 +126,7 @@ async function handleSend() {
 
     try{
         // 发起流式请求
-        const response=await fetch('http://localhost:8080/process-command',{
+        const response=await fetch('http://127.0.0.1:8000/process-command',{
             method:'POST',
             body:formData,
         });
@@ -115,7 +159,7 @@ async function handleSend() {
                 if (chunk.status === 'success' || chunk.type === 'status') {
                     responseContent.textContent += chunk.data || '';
                 } else if (chunk.type === 'final') {
-                    responseContent.textContent += `\n\n✅ ${chunk.data.message}（文件路径：${chunk.data.file_path}）`;
+                    responseContent.textContent += `\n\n✅ ${chunk.data.message}`;
                     document.getElementById('exportBtn').hidden = false;
                     document.getElementById('tempPath').value = chunk.data.file_path;
                 } else if (chunk.status === 'error' || chunk.type === 'error') {
@@ -124,7 +168,7 @@ async function handleSend() {
             }
 
             // 自动滚动到最新消息
-            resultContainer.scrollTop = resultContainer.scrollHeight;
+            scrollToBottom();
         }
 
     } catch (error) {
@@ -134,7 +178,7 @@ async function handleSend() {
         // 恢复发送按钮
         sendBtn.disabled = false;
         sendBtn.textContent = '发送';
-        resultContainer.scrollTop = resultContainer.scrollHeight;
+        scrollToBottom();
     }
 
 }

@@ -128,7 +128,7 @@ class FileUtils:
 
 if __name__ == "__main__":
     # 测试四种格式文档的读取，测试文件在reports目录下
-    # from src.paths import reports_path
-    # test_file = os.path.join(reports_path, "test.xlsx")
+    # from src.paths import test_file_path
+    # test_file = os.path.join(test_file_path, "test.xlsx")
     # print(FileUtils.parse_file(test_file))
     pass

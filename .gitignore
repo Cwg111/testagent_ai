@@ -11,7 +11,8 @@ __pycache__/
 # 保留文件夹，仅忽略其内部内容
 **/generated_cases/**
 **/generated_scripts/**
-**/reports/**
+**/test_file/**
+**/temp_uploads/**
 
 # 可补充其他需要忽略的内容（比如日志文件、临时文件）
 *.log
