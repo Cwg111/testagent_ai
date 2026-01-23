@@ -80,7 +80,7 @@ class TestGenerator:
             return  # 当解析失败时，返回错误信息，不再执行后续代码
         # 返回状态，开始解析需求文档
         yield {
-            "status": "success",
+            "status": "status",
             "session_id": session_id,
             "data": "开始解析需求文档，生成测试用例中..."
         }
@@ -143,7 +143,7 @@ class TestGenerator:
         case_path_target = ""
         if use_context:
             yield {
-                "status": "success",
+                "status": "status",
                 "session_id": session_id,
                 "data": "回答这个问题需要使用上下文，正读取上下文中..."
             }
@@ -167,7 +167,7 @@ class TestGenerator:
 
         # 返回状态，开始解析用例
         yield {
-            "status": "success",
+            "status": "status",
             "session_id": session_id,
             "data": "开始解析测试用例，生成自动化测试脚本中..."
         }

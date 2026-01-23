@@ -78,6 +78,14 @@ reqFile.addEventListener('change', (e) => {
     showUploadedFileInChat(selectedFile.name);
 });
 
+// HTML转义工具函数
+// function escapeHTML(unsafe) {
+//     if (!unsafe) return '';
+//     return unsafe
+//     .replace(/&/g, '&amp;')
+//     .replace(/</g, '&lt;')/>)
+// }
+
 // 发送按钮核心逻辑（流式请求+实时显示）
 async function handleSend() {
     const commandText = chatInput.value.trim();
