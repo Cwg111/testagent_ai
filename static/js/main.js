@@ -1,7 +1,7 @@
 // 元素绑定
 const reqFile = document.getElementById('reqFile');
 const uploadedFileContainer = document.querySelector('.uploaded-file-container');
-const chatContainer=document.querySelector('.chat-container');
+const chatContainer = document.querySelector('.chat-container');
 const resultContainer = document.getElementById('resultContainer');
 const sendBtn = document.getElementById('sendBtn');
 const chatInput = document.getElementById('chatInput');
@@ -19,8 +19,8 @@ function scrollToBottom() {
 }
 
 // 显示用户上传的文件名称到右侧聊天区
-function showUploadedFileInChat(fileName){
-    const fileMsg=document.createElement('div');
+function showUploadedFileInChat(fileName) {
+    const fileMsg = document.createElement('div');
     fileMsg.className = 'message user-message';
     fileMsg.innerHTML = `
         <div class="message-content">
@@ -33,8 +33,8 @@ function showUploadedFileInChat(fileName){
 }
 
 // 显示用户输入的问题
-function showUserQuestionInChat(question){
-    const questionMsg=document.createElement('div');
+function showUserQuestionInChat(question) {
+    const questionMsg = document.createElement('div');
     questionMsg.className = 'message user-message';
     questionMsg.innerHTML = `
         <div class="message-content">👤 ${question}</div>
@@ -70,7 +70,7 @@ reqFile.addEventListener('change', (e) => {
         uploadedFileContainer.innerHTML = '';
         // 删除右侧聊天区对应的文件信息
         const fileMsg = resultContainer.querySelectorAll('.user-message');
-        fileMsg.forEach(msg=>{
+        fileMsg.forEach(msg => {
             if (msg.innerHTML.includes('上传文件：')) msg.remove();
         });
     });
@@ -78,13 +78,68 @@ reqFile.addEventListener('change', (e) => {
     showUploadedFileInChat(selectedFile.name);
 });
 
+// 渲染测试用例表格的函数
+function renderTestCaseTable(tableData) {
+    if (!tableData || tableData.length === 0) return '';
+
+    // 1. 构建表头（和table_data的字段对应）
+    const thead = `
+        <thead>
+            <tr>
+                <th>功能模块</th>
+                <th>模块描述</th>
+                <th>用例ID</th>
+                <th>用例标题</th>
+                <th>前置条件</th>
+                <th>测试步骤</th>
+                <th>预期结果</th>
+            </tr>
+        </thead>
+    `;
+
+    // 2. 构建表体（遍历tableData）
+    let tbody = '<tbody>';
+    tableData.forEach(row => {
+        // 步骤字段处理：拆分、加序号、末尾加；
+        const rawSteps = escapeHtml(row.steps || '');
+        // 按逗号分割步骤，过滤空步骤（避免连续逗号导致的空项）
+        const stepArray = rawSteps.split(',').filter(step => step.trim() !== '');
+        // 给每个步骤加序号+末尾；，再用<br>换行拼接
+        const numberedSteps = stepArray
+            .map((step, index) => `${index + 1}. ${step.trim()}；`)
+            .join('<br>');
+        tbody += `
+            <tr>
+                <td>${escapeHtml(row.feature || '')}</td>
+                <td>${escapeHtml(row.module_desc || '')}</td>
+                <td>${escapeHtml(row.case_id || '')}</td>
+                <td>${escapeHtml(row.title || '')}</td>
+                <td>${escapeHtml(row.precondition || '')}</td>
+                <td>${numberedSteps}</td>
+                <td>${escapeHtml(row.expected || '')}</td>
+            </tr>
+        `;
+    });
+    tbody += '</tbody>';
+
+    // 3. 完整表格HTML（带样式类名，后续加CSS）
+    return `
+        <div class="case-table-container" >
+            <table class="case-table">${thead}${tbody}</table>
+        </div>
+    `;
+}
+
 // HTML转义工具函数
-// function escapeHTML(unsafe) {
-//     if (!unsafe) return '';
-//     return unsafe
-//     .replace(/&/g, '&amp;')
-//     .replace(/</g, '&lt;')/>)
-// }
+function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 // 发送按钮核心逻辑（流式请求+实时显示）
 async function handleSend() {
@@ -93,16 +148,14 @@ async function handleSend() {
     const funcType = functionType.value;
 
     // 基础校验
-    if (!commandText){
+    if (!commandText) {
         alert('请输入需求哦~');
         return 0;
     }
 
-    // 拼接功能类型指令
-    let fullCommand='';
-    if (funcType === 'test') fullCommand=`测试岗：${commandText}，生成功能用例+web脚本`;
-    else if (funcType === 'dev') fullCommand=`开发岗：${commandText}，生成接口自动化脚本`;
-    else if (funcType === 'product') fullCommand=`产品岗：${commandText}，生成需求验证用例`;
+    // 把用户在前端输入的指令原原本本的传给后端
+    let fullCommand = commandText;
+
 
     // 禁用发送按钮，防止重复点击
     sendBtn.disabled = true;
@@ -110,9 +163,9 @@ async function handleSend() {
 
     // 创建FormData（包含文件/指令、session_id）
     const formData = new FormData();
-    formData.append('command_text',fullCommand);
-    if (currentSessionId) formData.append('session_id',currentSessionId)
-    if (selectedFile) formData.append('file',selectedFile);
+    formData.append('command_text', fullCommand);
+    if (currentSessionId) formData.append('session_id', currentSessionId)
+    if (selectedFile) formData.append('file', selectedFile);
 
     // 清空输入框
     chatInput.value = '';
@@ -121,35 +174,38 @@ async function handleSend() {
     showUserQuestionInChat(commandText);
 
     // 创建AI回复容器（实时更新内容）
-    const messageDiv=document.createElement('div');
-    messageDiv.className=`message agent-message`;
-    messageDiv.innerHTML=`
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message agent-message`;
+    messageDiv.innerHTML = `
         <div class="message-content">
             <img src="/static/img/AI-test.png" class="message-icon" alt="AI图标">
             <div class="response-content"></div>
+            <button class="export-btn" onclick="exportContent()" style="display: none;">导出</button>
         </div>
     `;
     resultContainer.appendChild(messageDiv)
-    const responseContent=messageDiv.querySelector('.response-content');
+    const responseContent = messageDiv.querySelector('.response-content');
+    // 缓存当前AI消息的导出按钮
+    const currentExportBtn = messageDiv.querySelector('.export-btn');
 
-    try{
+    try {
         // 发起流式请求
-        const response=await fetch('http://127.0.0.1:8000/process-command',{
-            method:'POST',
-            body:formData,
+        const response = await fetch('http://127.0.0.1:8000/process-command', {
+            method: 'POST',
+            body: formData,
         });
 
         if (!response.ok) throw new Error(`请求失败: ${response.status}`);
 
         // 处理流式响应
-        const reader=response.body.getReader();
-        const decoder=new TextDecoder('utf-8');
-        let buffer='';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
         while (true) {
-            const {done,value}=await reader.read();
+            const {done, value} = await reader.read();
             if (done) break;
             // 解码并分割行（每行一个JSON）
-            buffer += decoder.decode(value, { stream: true });
+            buffer += decoder.decode(value, {stream: true});
             const lines = buffer.split('\n');
             buffer = lines.pop() || ''; // 保留未完成的最后一行
 
@@ -163,15 +219,32 @@ async function handleSend() {
                     currentSessionId = chunk.session_id;
                 }
 
-                // 区分响应类型：状态/内容/错误/最终结果
-                if (chunk.status === 'success' || chunk.type === 'status') {
-                    responseContent.textContent += chunk.data || '';
-                } else if (chunk.type === 'final') {
-                    responseContent.textContent += `\n\n✅ ${chunk.data.message}`;
-                    document.getElementById('exportBtn').hidden = false;
-                    document.getElementById('tempPath').value = chunk.data.file_path;
-                } else if (chunk.status === 'error' || chunk.type === 'error') {
-                    responseContent.innerHTML += `<br><span style="color: #e74c3c;">❌ ${chunk.data}</span>`;
+                if (chunk.type === "status") {
+                    // 补防御：chunk.data为null/undefined时置空
+                    responseContent.innerHTML += `${chunk.data || ''}`;
+                    responseContent.innerHTML += '<br><div class="response-divider"></div>';
+                } else if (chunk.type === "error") {
+                    // 补防御
+                    responseContent.innerHTML += `<span style="color: #9b59b6; font-weight: 500; display: inline-block; 
+                         padding: 4px 8px; border-radius: 4px;
+                         background: #f8f0ff;">🤔 ${chunk.data || ''}</span>`;
+                    responseContent.innerHTML += '<br><div class="response-divider"></div>';
+                } else if (chunk.type === "success") {
+                    // 补防御：先处理null/undefined，再转义
+                    const safeData = chunk.data || '';
+                    const escapedData = escapeHtml(safeData);
+                    responseContent.innerHTML += escapedData.replace(/\n/g, '<br>');
+                } else if (chunk.type === "final") {
+                    // 补防御
+                    responseContent.innerHTML += `<br>✅ ${chunk.data?.message || ''}<br>`;
+                    document.getElementById('tempPath').value = chunk.data?.file_path || '';
+                    currentExportBtn.style.display = 'block';
+
+                    // 如果final数据里有table_data，渲染表格
+                    if (chunk.data?.table_data) {
+                        const tableHtml = renderTestCaseTable(chunk.data.table_data);
+                        responseContent.innerHTML += tableHtml;
+                    }
                 }
             }
 
@@ -206,5 +279,4 @@ function exportContent() {
 window.addEventListener('load', () => {
     currentSessionId = null;
     resultContainer.innerHTML = ''; // 清空历史结果
-    document.getElementById('exportBtn').hidden = true;
 });

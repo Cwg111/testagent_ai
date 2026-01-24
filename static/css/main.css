@@ -55,7 +55,9 @@ h1 {
 .message-icon {
     width: 28px;
     height: 28px;
-    vertical-align: middle;
+    flex-shrink: 0;
+    margin-top: 1px;
+    /*vertical-align: middle;*/
     /*margin-right: 8px;*/
     border-radius: 4px;
 }
@@ -251,8 +253,18 @@ h1 {
 
 /* 导出按钮样式 */
 .export-btn {
+    position: absolute;
+    bottom: 12px !important;
+    right: 12px !important;
+    padding: 6px 12px;
     background-color: #2ecc71;
     color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    z-index: 10 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .export-btn:hover {
@@ -278,10 +290,10 @@ h1 {
 
 /* AI消息：组合选择器提高优先级 */
 .message.agent-message {
-    display: flex !important;
     justify-content: flex-start !important; /* 强制居左 */
     margin-bottom: 15px !important;
     width: 100% !important;
+    display: flex !important;
 }
 
 /* AI消息内容区 */
@@ -294,6 +306,7 @@ h1 {
     display: flex;
     align-items: flex-start;
     gap: 8px;
+    position: relative;
 }
 
 .response-content {
@@ -301,6 +314,7 @@ h1 {
     white-space: pre-wrap;
     line-height: 1.8;
     flex: 1;
+    padding-bottom: 0;
 }
 
 .agent-message .response-divider {
@@ -309,5 +323,45 @@ h1 {
     border-top: 1px solid #dcdcdc;
     margin: 2px 0;
     width: 100%;
+}
+
+/* 测试用例表格样式 */
+.case-table-container {
+    width: 100%;
+    overflow-x: auto; /* 适配小屏幕，横向滚动 */
+    margin: 4px 0;
+    line-height: 1.4;
+}
+
+.case-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin: 0;
+}
+
+.case-table th, .case-table td {
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+    font-size: 13px;
+}
+
+.case-table th {
+    background-color: #f5f7fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.case-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* 适配步骤列换行 */
+.case-table td {
+    word-wrap: break-word;
+    white-space: pre-wrap;
 }
 

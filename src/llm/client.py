@@ -113,11 +113,13 @@ class LLMClient:
         :return: 生成的自动化测试脚本
         """
         prompt = WEB_SCRIPT_PROMPTS.format(case_text=case_text)
-        script = self._call_llm_stream(prompt, force_json=False)
         stream_generator = self._call_llm_stream(prompt, force_json=False)
         # 清理markdown代码块标记（流式逐段清理）
         code_block_flag = False
         for chunk in stream_generator:
+            # 全局过滤纯"python"的chunk
+            if chunk.strip()=="python":
+                continue
             if chunk.startswith("```python"):
                 code_block_flag = True
                 chunk = chunk.replace("```python", "").strip()
