@@ -15,7 +15,8 @@ class CommandParser:
         解析用户指令，返回结构化意图
         :param command_text: 用户输入的自然语言指令
         :return: {"intent":str,"use_context":bool}
-        intent指的是是生成用例，还是生成代码；
+        intent指的是generate_case"|"generate_web_script"|"generate_api_script"|"generate_requirements_checklist"
+        |"general"；
         use_context指的是是否使用上下文
         """
         command = command_text.strip()
@@ -39,5 +40,5 @@ class CommandParser:
 
 
 if __name__ == "__main__":
-    print(CommandParser().parse_command("基于我上传的这个测试用例，生成测试脚本"))
+    print(CommandParser().parse_command("你好，我今天心情不好，能安慰一下我吗？"))
     run_code = 0

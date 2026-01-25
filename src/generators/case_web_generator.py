@@ -6,74 +6,24 @@ import json
 from typing import Dict, Generator
 from openpyxl.styles import Alignment
 import pandas as pd
-
 from src.llm.client import LLMClient
-from src.command_parser import CommandParser
 from src.context_manager import session_manager
 from src.file_utils import FileUtils
 from src.paths import *
 
 
 class TestGenerator:
-    def __init__(self):
-        self.llm_client = LLMClient()
-        self.command_parser = CommandParser()
+    def __init__(self,llm_client:LLMClient):
+        self.llm_client = llm_client
 
-    def process_by_command(self, file_path: str, command_text: str, session_id: str = None) -> Generator[
-        Dict, None, None]:
-        """
-        核心入口，生成测试用例/测试脚本，逐段返回结果
-        :param file_path: 需求文档/用例文件路径
-        :param command_text: 用户输入的自然语言指令
-        :param session_id: 当前会话ID，默认为None
-        :yield: 流式返回字典，格式：
-        {
-            "type":"status"/"content"/"final"/"error"
-            "session_id":str,
-            "data":状态信息/实时内容/最终结果/错误信息
-        }
-        """
-        session = session_manager.get_session(session_id)
-        current_session_id = session.session_id
-        yield {
-            "type": "status",
-            "session_id": current_session_id,
-            "data": "开始处理指令"
-        }
-
-        try:
-            command_intent = self.command_parser.parse_command(command_text)
-            intent = command_intent["intent"]
-            use_context = command_intent["use_context"]
-            if intent == "generate_case":
-                yield from self._handle_generate_case(file_path, current_session_id)
-            elif intent == "generate_web_script":
-                yield from self._handle_generate_script(use_context, file_path, current_session_id)
-            else:
-                yield {
-                    "type": "error",
-                    "session_id": current_session_id,
-                    "data": f"暂时没法帮你处理「{command_text}」这个指令哦～我目前可以帮你生成测试用例、web/接口自动化测试脚本，"
-                            f"还有需求检查清单，"
-                            f"换个相关指令试试吧～"
-                }
-                return
-        except Exception as e:
-            yield {
-                "type": "error",
-                "session_id": current_session_id,
-                "data": f"生成失败：{str(e)}"
-            }
-            return
-
-    def _handle_generate_case(self, file_path: str, session_id: str = None) -> Generator[Dict, None, None]:
+    def handle_generate_case(self, file_path: str, session_id: str = None) -> Generator[Dict, None, None]:
         """
         流式生成测试用例（返回表格渲染数据）
         :param file_path: 需求文档路径
         :param session_id: 当前会话的ID
         :yield: 流式返回字典，格式：
         {
-            "type":"status"/"content"/"final"/"error/table_display"
+            "type":"status"/"json_chunk"/"final"/"error"
             "session_id":str,
             "data":状态信息/实时内容/最终结果/错误信息
         }
@@ -98,9 +48,9 @@ class TestGenerator:
         for chunk in case_json_stream:
             full_case_json += chunk
             yield {
-                "type": "success",
+                "type": "json_chunk",
                 "session_id": session_id,
-                "data": chunk  # 前端实时显示JSON片段
+                "data": chunk  # 前端不显示JSON片段
             }
         # 解析用例JSON，生成表格数据
         try:
@@ -116,8 +66,7 @@ class TestGenerator:
 
         table_data = self._convert_to_table_format(case_data)
         save_case_path = self._generate_testcase_excel(table_data, case_data)
-        # with open(save_case_path, "w", encoding="utf-8") as f:
-        #     json.dump(table_data, f, indent=2, ensure_ascii=False)  # type: ignore
+
 
         # 本次会话记住生成的用例路径，下次请求时使用
         session_manager.save_case_path(session_id, save_case_path)
@@ -129,11 +78,11 @@ class TestGenerator:
                 "status": "success",
                 "message": "生成测试用例成功，将为您用表格展示",
                 "file_path": save_case_path,
-                "table_data": table_data
+                "case_table_data": table_data
             }
         }
 
-    def _handle_generate_script(self, use_context: bool, file_path: str = None, session_id: str = None) -> Generator[
+    def handle_generate_web_script(self, use_context: bool, file_path: str = None, session_id: str = None) -> Generator[
         Dict, None, None]:
         """
         流式生成生成Selenium+pytest测试脚本
@@ -312,11 +261,11 @@ class TestGenerator:
 
 
 if __name__ == "__main__":
-    # 测试需求文档生成测试用例
-    test_file_path = os.path.join(test_file_path, "需求文档.docx")
-    generator = TestGenerator().process_by_command(test_file_path, "你好", session_id=None)
-    for chunk in generator:
-        print(chunk)
+    # # 测试需求文档生成测试用例
+    # test_file_path = os.path.join(test_file_path, "需求文档.docx")
+    # generator = TestGenerator().process_by_command(test_file_path, "你好", session_id=None)
+    # for chunk in generator:
+    #     print(chunk)
     # # 测试用例生成Selenium+pytest脚本
     # test_file_path = os.path.join(test_file_path, "电商系统V2.0测试用例.xlsx")
     # generator = TestGenerator().process_by_command(test_file_path, "生成自动化测试脚本", session_id=None)

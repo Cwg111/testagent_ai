@@ -130,6 +130,55 @@ function renderTestCaseTable(tableData) {
     `;
 }
 
+function renderChecklistTable(tableData) {
+    if (!tableData || tableData.length === 0) return '';
+
+    // 1. 构建表头（和table_data的字段对应）
+    const thead = `
+        <thead>
+            <tr>
+                <th>检查类别</th>
+                <th>类别描述</th>
+                <th>检查事项步骤</th>
+                <th>对应需求点编号</th>
+                <th>检查标准</th>
+                <th>是否通过</th>
+            </tr>
+        </thead>
+    `;
+
+    // 2. 构建表体（遍历tableData）
+    let tbody = '<tbody>';
+    tableData.forEach(row => {
+        // 步骤字段处理：拆分、加序号、末尾加；
+        const rawItems = escapeHtml(row.check_item || '');
+        // 按逗号分割步骤，过滤空步骤（避免连续逗号导致的空项）
+        const itemArray = rawItems.split(',').filter(item => item.trim() !== '');
+        // 给每个步骤加序号+末尾；，再用<br>换行拼接
+        const numberedItems = itemArray
+            .map((item, index) => `${index + 1}. ${item.trim()}；`)
+            .join('<br>');
+        tbody += `
+            <tr>
+                <td>${escapeHtml(row.check_modules || '')}</td>
+                <td>${escapeHtml(row.module_desc || '')}</td>
+                <td>${numberedItems}</td>
+                <td>${escapeHtml(row.corresponding_requirement || '')}</td>
+                <td>${escapeHtml(row.check_standard || '')}</td>
+                <td>${escapeHtml(row.is_passed || '')}</td>
+            </tr>
+        `;
+    });
+    tbody += '</tbody>';
+
+    // 3. 完整表格HTML（带样式类名，后续加CSS）
+    return `
+        <div class="checklist-table-container" >
+            <table class="checklist-table">${thead}${tbody}</table>
+        </div>
+    `;
+}
+
 // HTML转义工具函数
 function escapeHtml(unsafe) {
     if (!unsafe) return '';
@@ -219,30 +268,74 @@ async function handleSend() {
                     currentSessionId = chunk.session_id;
                 }
 
+                if (chunk.type === "json_chunk") {
+                    continue;
+                }
+
                 if (chunk.type === "status") {
                     // 补防御：chunk.data为null/undefined时置空
-                    responseContent.innerHTML += `${chunk.data || ''}`;
+                    // 核心判断：仅当data存在且包含...时，才添加加载动画优化
+                    if (chunk.data && chunk.data.includes('...')) {
+                        // 仅渲染一次，避免重复
+                        // const existingTip = responseContent.querySelector('#loading-tip-with-dot');
+                        // if (!existingTip) {
+                        // 关键：把文字单独放在span#loading-text里，样式/动画单独分离
+                        responseContent.innerHTML += `
+                             <div class="status-with-dot" id="loading-tip-with-dot">
+                                    <span class="simple-loading-spinner"></span>
+                                    <span id="loading-text">${chunk.data}</span>
+                             </div>
+                            `;
+                        // }
+                    } else {
+                        // 不含...的status，按原有逻辑处理
+                        responseContent.innerHTML += chunk.data || '';
+                    }
                     responseContent.innerHTML += '<br><div class="response-divider"></div>';
                 } else if (chunk.type === "error") {
+                    const loadingTip = responseContent.querySelector('#loading-tip-with-dot');
+                    const loadingText = responseContent.querySelector('#loading-text');
+                    if (loadingTip && loadingText) {
+                        // 核心：只保留文字，清除所有样式/动画
+                        loadingTip.outerHTML = loadingText.textContent; // 替换为纯文字，清除所有样式
+                    }
                     // 补防御
                     responseContent.innerHTML += `<span style="color: #9b59b6; font-weight: 500; display: inline-block; 
                          padding: 4px 8px; border-radius: 4px;
                          background: #f8f0ff;">🤔 ${chunk.data || ''}</span>`;
                     responseContent.innerHTML += '<br><div class="response-divider"></div>';
                 } else if (chunk.type === "success") {
+                    const loadingTip = responseContent.querySelector('#loading-tip-with-dot');
+                    const loadingText = responseContent.querySelector('#loading-text');
+                    if (loadingTip && loadingText) {
+                        // 核心：只保留文字，清除所有样式/动画
+                        loadingTip.outerHTML = loadingText.textContent; // 替换为纯文字，清除所有样式
+                    }
                     // 补防御：先处理null/undefined，再转义
                     const safeData = chunk.data || '';
                     const escapedData = escapeHtml(safeData);
                     responseContent.innerHTML += escapedData.replace(/\n/g, '<br>');
                 } else if (chunk.type === "final") {
+                    const loadingTip = responseContent.querySelector('#loading-tip-with-dot');
+                    const loadingText = responseContent.querySelector('#loading-text');
+                    if (loadingTip && loadingText) {
+                        // 核心：只保留文字，清除所有样式/动画
+                        loadingTip.outerHTML = loadingText.textContent; // 替换为纯文字，清除所有样式
+                    }
                     // 补防御
                     responseContent.innerHTML += `<br>✅ ${chunk.data?.message || ''}<br>`;
                     document.getElementById('tempPath').value = chunk.data?.file_path || '';
                     currentExportBtn.style.display = 'block';
 
-                    // 如果final数据里有table_data，渲染表格
-                    if (chunk.data?.table_data) {
-                        const tableHtml = renderTestCaseTable(chunk.data.table_data);
+                    // 如果final数据里有case_table_data，渲染测试用例表格
+                    if (chunk.data?.case_table_data) {
+                        const tableHtml = renderTestCaseTable(chunk.data.case_table_data);
+                        responseContent.innerHTML += tableHtml;
+                    }
+
+                    // 如果final数据里有checklist_table_data，渲染检查清单表格
+                    if (chunk.data?.checklist_table_data) {
+                        const tableHtml = renderChecklistTable(chunk.data.checklist_table_data);
                         responseContent.innerHTML += tableHtml;
                     }
                 }

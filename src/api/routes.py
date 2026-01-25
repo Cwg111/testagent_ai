@@ -8,12 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import json
 import os
-from src.generators.case_web_generator import TestGenerator
+from src.generators.command_processor import CommandDispatcher
 from src.paths import temp_path, index_html_path, static_path
 
 # 初始化FastAPI应用
 app = FastAPI()
-test_generator = TestGenerator()
+command_dispatcher = CommandDispatcher()
 
 # 静态资源路由
 app.mount("/static", StaticFiles(directory=static_path), name="static")
@@ -57,7 +57,7 @@ async def process_command(
 
     # 定义流式响应生成器
     def stream_response():
-        for chunk in test_generator.process_by_command(
+        for chunk in command_dispatcher.process_by_command(
                 file_path=file_path,
                 command_text=command_text,
                 session_id=session_id

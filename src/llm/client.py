@@ -1,12 +1,15 @@
 # @FileName  :client.py
 # @Time      :2026/1/19 10:11
 # @Author    :ChenWenGang
-from typing import Dict, Generator
+from typing import Dict, Generator, Optional
 from openai import OpenAI
 import json
 from src.config import CONFIG
 from src.llm.test_case_prompts import TEST_CASE_PROMPTS
 from src.llm.web_script_prompts import WEB_SCRIPT_PROMPTS
+from src.llm.api_script_prompts import API_SCRIPT_PROMPTS
+from src.llm.requirement_checklist_prompts import Requirement_CHECKLIST_PROMPTS
+from src.llm.general_prompts import GENERAL_PROMPT_WITH_DOC,GENERAL_PROMPT_WITHOUT_DOC
 from src.llm.command_intent_prompts import COMMAND_INTENT_PROMPTS
 
 
@@ -84,12 +87,12 @@ class LLMClient:
     # ----------------测试岗能力------------
     def parse_requirement_to_testcase_stream(self, requirement_text: str) -> Generator[str, None, None]:
         """
-        流式返回测试用例JSON（前端实时显示加载过程）
+        流式返回测试用例JSON（前端只显示最终表格）
         :param requirement_text: 需求文档
         :return: 生成器
         """
         prompt = TEST_CASE_PROMPTS.format(requirement_text=requirement_text)
-        # 逐段返回，前端显示加载过程
+        # 逐段返回
         yield from self._call_llm_stream(prompt)
 
     def parse_requirement_to_testcase(self, requirement_text: str) -> Dict:
@@ -129,6 +132,66 @@ class LLMClient:
             elif code_block_flag:
                 pass  # 中间块直接返回
             yield chunk
+
+    # ----------------开发岗能力------------
+    def api_to_script(self, api_text: str) -> Generator[str, None, None]:
+        """
+        接口文档->requests+python接口自动化脚本，流式返回
+        :param api_text: 接口文档
+        :return: 生成的接口自动化脚本
+        """
+        # 1. 将模板按{api_text}分割为前后两部分
+        template_parts = API_SCRIPT_PROMPTS.split("{api_text}")
+        if len(template_parts) != 2:
+            raise ValueError("API_SCRIPT_PROMPTS 模板中必须且只能包含一个 {api_text} 占位符")
+
+        # 2. 拼接最终prompt：模板前半部分 + 接口文档内容 + 模板后半部分
+        prompt = template_parts[0] + api_text + template_parts[1]
+        # prompt = API_SCRIPT_PROMPTS.format(api_text=api_text)
+        stream_generator = self._call_llm_stream(prompt, force_json=False)
+        # 清理markdown代码块标记（流式逐段清理）
+        code_block_flag = False
+        for chunk in stream_generator:
+            # 全局过滤纯"python"的chunk
+            if chunk.strip()=="python":
+                continue
+            if chunk.startswith("```python"):
+                code_block_flag = True
+                chunk = chunk.replace("```python", "").strip()
+            elif chunk.endswith("```"):
+                code_block_flag = False
+                chunk = chunk.replace("```", "").strip()
+            elif code_block_flag:
+                pass  # 中间块直接返回
+            yield chunk
+
+    # ----------------产品岗能力------------
+    def parse_requirement_to_checklist_stream(self, requirement_text: str) -> Generator[str, None, None]:
+        """
+        流式返回上线前检查清单JSON（前端只显示最终表格）
+        :param requirement_text: 需求文档
+        :return: 生成器
+        """
+        prompt = Requirement_CHECKLIST_PROMPTS.format(requirement_text=requirement_text)
+        # 逐段返回
+        yield from self._call_llm_stream(prompt)
+
+    # ----------------通用大模型能力------------
+    def general_stream(self,user_query: str,document_content:Optional[str]=None)-> Generator[str, None, None]:
+        """
+        通用大模型能力，流式返回，以纯文本的形式返回
+        :param user_query: 用户输入，必须传入
+        :param document_content: 文档，不是必须传入，默认为None
+        :return: 生成器
+        """
+        if document_content:
+            prompt = GENERAL_PROMPT_WITH_DOC.format(document_content=document_content, user_query=user_query)
+        else:
+            prompt = GENERAL_PROMPT_WITHOUT_DOC.format(user_query=user_query)
+        yield from self._call_llm_stream(prompt, force_json=False)
+
+
+
 
     def parse_command_intent(self, command_text: str) -> Dict:
         """
