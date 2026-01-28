@@ -40,5 +40,5 @@ class CommandParser:
 
 
 if __name__ == "__main__":
-    print(CommandParser().parse_command("你好，我今天心情不好，能安慰一下我吗？"))
+    print(CommandParser().parse_command("测试一下trae的git提交"))
     run_code = 0
