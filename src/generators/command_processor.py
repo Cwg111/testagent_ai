@@ -26,7 +26,7 @@ class CommandDispatcher:
         self.general_generator=GeneralGenerator(llm_client=self.llm_client)
         self.command_parser=CommandParser()
 
-    def process_by_command(self, file_path: str, command_text: str, session_id: str = None) -> Generator[
+    def process_by_command(self, file_path: str, command_text: str, session_id: str ) -> Generator[
         Dict, None, None]:
         """
         根据不同的指令调用不同的生成器函数
@@ -81,9 +81,9 @@ class CommandDispatcher:
             }
             return
 if __name__ == '__main__':
-    from src.paths import *
-    file_path=os.path.join(test_file_path, "电商系统V2.0需求文档.docx")
-    dispatcher=CommandDispatcher()
-    for chunk in dispatcher.process_by_command(file_path, "帮我阅读一下这个文档，总结一下"):
-        print(chunk)
-    # pass
+    # from src.paths import *
+    # file_path=os.path.join(test_file_path, "电商系统V2.0需求文档.docx")
+    # dispatcher=CommandDispatcher()
+    # for chunk in dispatcher.process_by_command(file_path, "帮我阅读一下这个文档，总结一下"):
+    #     print(chunk)
+    pass

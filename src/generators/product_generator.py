@@ -16,7 +16,7 @@ class ProductGenerator:
     def __init__(self,llm_client:LLMClient):
         self.llm_client = llm_client
 
-    def handle_generate_checklist(self, file_path: str, session_id: str = None) -> Generator[Dict, None, None]:
+    def handle_generate_checklist(self, file_path: str, session_id: str ) -> Generator[Dict, None, None]:
         """
         流式生成需求检查清单（返回表格渲染数据）
         :param file_path: 需求文档路径
@@ -170,7 +170,7 @@ class ProductGenerator:
                 "是否通过": 20
             }
             for col_name, width in column_widths.items():
-                col_idx = df.columns.get_loc(col_name) + 1  # openpyxl列索引从1开始
+                col_idx = df.columns.get_loc(col_name) + 1  # type: ignore
                 worksheet.column_dimensions[chr(64 + col_idx)].width = width
 
             # 单元格自动换行+顶部对齐（匹配截图）

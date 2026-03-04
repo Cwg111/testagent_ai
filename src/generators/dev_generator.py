@@ -12,7 +12,7 @@ class DevGenerator:
     def __init__(self, llm_client: LLMClient):
         self.llm_client = llm_client
 
-    def handle_generate_api_script(self, file_path: str = None, session_id: str = None) -> Generator[
+    def handle_generate_api_script(self, file_path: str , session_id: str ) -> Generator[
         Dict, None, None]:
         """
         流式生成生成requests+python接口自动化测试脚本

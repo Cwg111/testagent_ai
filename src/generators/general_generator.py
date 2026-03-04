@@ -15,7 +15,7 @@ class GeneralGenerator:
     def __init__(self, llm_client: LLMClient):
         self.llm_client = llm_client
 
-    def handle_general(self, command_text: str,use_context: bool, file_path: str = None, session_id: str = None) -> Generator[
+    def handle_general(self, command_text: str,use_context: bool, file_path: str , session_id: str ) -> Generator[
         Dict, None, None]:
         """
         流式生成通用大模型回答的内容

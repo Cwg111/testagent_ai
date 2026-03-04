@@ -16,7 +16,7 @@ class TestGenerator:
     def __init__(self,llm_client:LLMClient):
         self.llm_client = llm_client
 
-    def handle_generate_case(self, file_path: str, session_id: str = None) -> Generator[Dict, None, None]:
+    def handle_generate_case(self, file_path: str, session_id: str ) -> Generator[Dict, None, None]:
         """
         流式生成测试用例（返回表格渲染数据）
         :param file_path: 需求文档路径
@@ -82,7 +82,7 @@ class TestGenerator:
             }
         }
 
-    def handle_generate_web_script(self, use_context: bool, file_path: str = None, session_id: str = None) -> Generator[
+    def handle_generate_web_script(self, use_context: bool, file_path: str , session_id: str ) -> Generator[
         Dict, None, None]:
         """
         流式生成生成Selenium+pytest测试脚本
@@ -143,7 +143,7 @@ class TestGenerator:
 
         # 保存脚本文件
         script_filename = f"test_web_{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.py"
-        save_script_path = os.path.join(web_script_path, script_filename)
+        save_script_path = os.path.join(web_script_path, script_filename) 
         with open(save_script_path, "w", encoding="utf-8") as f:
             f.write(full_script)
 
@@ -249,7 +249,7 @@ class TestGenerator:
                 "预期结果": 30
             }
             for col_name, width in column_widths.items():
-                col_idx = df.columns.get_loc(col_name) + 1  # openpyxl列索引从1开始
+                col_idx = df.columns.get_loc(col_name) + 1  # type: ignore
                 worksheet.column_dimensions[chr(64 + col_idx)].width = width
 
             # 单元格自动换行+顶部对齐（匹配截图）

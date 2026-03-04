@@ -2,8 +2,9 @@
 # @Time      :2026/1/19 9:55
 # @Author    :ChenWenGang
 import yaml
+import os
 from dotenv import load_dotenv
-from .paths import *
+from .paths import env_path, config_yaml_path
 
 # 加载env文件
 load_dotenv(dotenv_path=env_path)
